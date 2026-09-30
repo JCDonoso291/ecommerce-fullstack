@@ -1,0 +1,19 @@
+# Dependencias
+node_modules/
+back/node_modules/
+front/node_modules/
+
+# Variables de entorno
+.env
+back/.env
+front/.env
+
+# Archivos generados
+dist/
+front/dist/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
