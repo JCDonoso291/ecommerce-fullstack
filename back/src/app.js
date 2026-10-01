@@ -3,11 +3,15 @@ import cors from "cors";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import sequelize from "./config/database.js";
+
 import Client from "./models/Client.js";
 import Admin from "./models/Admin.js";
+import Product from "./models/Product.js";
+
 import authRoutes from "./routes/authRoutes.js";
 import clientRoutes from "./routes/clientRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
 
 dotenv.config();
 
@@ -20,6 +24,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/client", clientRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/products", productRoutes);
 
 const PORT = process.env.PORT || 3000;
 
