@@ -1,8 +1,10 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   loginClient as loginClientService,
   loginAdmin as loginAdminService,
+  renovarToken,
+  cerrarSesion,
 } from "../services/authService.js";
 
 export const AuthContext = createContext();
@@ -24,20 +26,53 @@ export const AuthProvider = ({ children }) => {
     localStorage.getItem("adminRole")
   );
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Mantener la sesión después de F5
+  useEffect(() => {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (!refreshToken) {
+      setIsLoading(false);
+      return;
+    }
+
+    renovarToken(refreshToken)
+      .then((response) => {
+        const nuevoToken = response.data.accessToken;
+
+        localStorage.setItem("token", nuevoToken);
+        setToken(nuevoToken);
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("userType");
+        localStorage.removeItem("adminRole");
+
+        setToken(null);
+        setUserType(null);
+        setAdminRole(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   const loginClient = (email, password) => {
     setIsLoading(true);
 
     return loginClientService(email, password)
       .then((response) => {
-        const nuevoToken = response.data.token;
+        const accessToken = response.data.accessToken;
+        const refreshToken = response.data.refreshToken;
 
-        localStorage.setItem("token", nuevoToken);
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("userType", "client");
         localStorage.removeItem("adminRole");
 
-        setToken(nuevoToken);
+        setToken(accessToken);
         setUserType("client");
         setAdminRole(null);
 
@@ -53,19 +88,21 @@ export const AuthProvider = ({ children }) => {
 
     return loginAdminService(email, password)
       .then((response) => {
-        const nuevoToken = response.data.token;
+        const accessToken = response.data.accessToken;
+        const refreshToken = response.data.refreshToken;
 
         const payload = JSON.parse(
-          atob(nuevoToken.split(".")[1])
+          atob(accessToken.split(".")[1])
         );
 
         const role = payload.role;
 
-        localStorage.setItem("token", nuevoToken);
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("userType", "admin");
         localStorage.setItem("adminRole", role);
 
-        setToken(nuevoToken);
+        setToken(accessToken);
         setUserType("admin");
         setAdminRole(role);
 
@@ -77,7 +114,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (refreshToken) {
+      cerrarSesion(refreshToken).catch(() => {});
+    }
+
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("userType");
     localStorage.removeItem("adminRole");
 

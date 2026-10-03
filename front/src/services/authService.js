@@ -16,3 +16,17 @@ export const loginAdmin = (email, password) => {
   });
 };
 
+// Renovar Access Token
+export const renovarToken = (refreshToken) => {
+  return api.post("/auth/refresh", {
+    refreshToken,
+  });
+};
+
+// Cerrar sesión
+export const cerrarSesion = (refreshToken) => {
+  return api.post("/auth/logout", {
+    refreshToken,
+  });
+};
+

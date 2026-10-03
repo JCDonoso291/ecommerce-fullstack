@@ -34,6 +34,11 @@ const Client = sequelize.define(
     telefono: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+
+    refreshToken: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   },
   {
@@ -43,3 +48,4 @@ const Client = sequelize.define(
 );
 
 export default Client;
+

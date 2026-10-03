@@ -34,6 +34,11 @@ const Admin = sequelize.define(
       ),
       allowNull: false,
       defaultValue: "superadmin"
+    },
+
+    refreshToken: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   },
   {
@@ -43,4 +48,5 @@ const Admin = sequelize.define(
 );
 
 export default Admin;
+
 
